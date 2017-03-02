@@ -78,23 +78,6 @@ public class EssayLab {
         }
     }
 
-    /*获取特定JsonID的essay*/
-    public Essay getEssay(String id){
-        EssayCursorWrapper essayCursorWrapper = queryEssays(
-                EssayTable.Cols.JSONID + "=?", new String[] {id});
-
-        try {
-            if (essayCursorWrapper.getCount() == 0){
-                return null;
-            }
-
-            essayCursorWrapper.moveToFirst();
-            return essayCursorWrapper.getEssay();
-        }finally {
-            essayCursorWrapper.close();
-        }
-    }
-
     /*更改数据库数据*/
     public void updateEssay(Essay essay){
         String uuidString = essay.getId().toString();

@@ -16,10 +16,6 @@ import android.widget.TextView;
 import com.example.anshengqiang.learnin.fetchr.HexoFetchr;
 import com.example.anshengqiang.learnin.model.Essay;
 import com.example.anshengqiang.learnin.model.EssayLab;
-
-import org.json.JSONException;
-
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -31,7 +27,6 @@ public class LearnInFragment extends Fragment {
     private static final String TAG = "LearnInFragment";
 
     private static final String ZHI_HU = "http://news-at.zhihu.com/api/4/news/";
-    private List<Essay> mEssays;
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -101,10 +96,10 @@ public class LearnInFragment extends Fragment {
 
             mTextView1.setText(essay.getId().toString());
             mTextView2.setText(essay.getTitle());
-            mTextView3.setText(essay.getJsonId());
+            mTextView3.setText(essay.getDetail());
             mTextView4.setText(essay.getImage());
-            mTextView5.setText(essay.getCss());
-            mTextView6.setText(essay.getDetail());
+            mTextView5.setText(essay.getJsonId());
+            mTextView6.setText(essay.getCss());
 
         }
     }
@@ -138,30 +133,14 @@ public class LearnInFragment extends Fragment {
         }
     }
 
-    public class FetchItemTask extends AsyncTask<Void, Void, List<Essay>>{
-        List<Essay> mItems;
-
+    public class FetchItemTask extends AsyncTask<Void, Void, Void>{
 
         @Override
-        protected List<Essay> doInBackground(Void... params) {
+        protected Void doInBackground(Void... params) {
             HexoFetchr fetchr = new HexoFetchr();
-            try {
-                fetchr.fetchLatest(getActivity().getApplicationContext(), ZHI_HU);
-                mItems = fetchr.fetchDetail(getActivity().getApplicationContext(), ZHI_HU);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return mItems;
-        }
-
-        /*此方法接受doInBackground返回的参数，在线程完成的时候自动调用*/
-        @Override
-        protected void onPostExecute(List<Essay> items){
-            mEssays = items;
-            updateUI();
+            fetchr.fetchLatest(ZHI_HU);
+            fetchr.fetchDetail(ZHI_HU);
+            return null;
         }
     }
 
