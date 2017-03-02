@@ -1,75 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/list_item_essay_card_view"
     android:layout_width="match_parent"
-    android:layout_margin="16dp"
-    android:layout_height="160dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="8dp"
-    android:clickable="true">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-    <RelativeLayout
-        android:orientation="vertical"
+    <!--cardPreventCornerOverlap false 图片覆盖圆角 api<21 -->
+    <!--clickable 不设置监听器也有点击效果-->
+    <!--android:foreground="?android:attr/selectableItemBackground" 前景色 用来设置点击效果-->
+    <!--cardCornerRadius 圆角-->
+    <!--cardElevation z轴阴影-->
+    <android.support.v7.widget.CardView
+        android:id="@+id/list_item_essay_card_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/card_margin"
+        android:clickable="true"
+        app:cardPreventCornerOverlap="false"
+        android:foreground="?android:attr/selectableItemBackground"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="8dp"
+        android:stateListAnimator="@drawable/lift_on_touch">
 
-
-        <ImageView
-            android:id="@+id/list_item_essay_image_view"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/title_image"/>
+            android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/text_1"
-            android:layout_alignParentTop="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:hint="text_1"/>
 
-        <TextView
-            android:id="@+id/text_2"
-            android:layout_below="@id/text_1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:hint="text2"
-            />
+            <ImageView
+                android:id="@+id/list_item_essay_image_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/title_image"/>
 
-        <TextView
-            android:id="@+id/text_3"
-            android:layout_below="@id/text_2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:hint="text3"
-            />
+            <TextView
+                android:id="@+id/list_item_title_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                tools:hint="今天文章的标题"
+                android:layout_alignBottom="@id/list_item_essay_image_view"/>
 
-        <TextView
-            android:id="@+id/text_4"
-            android:layout_below="@id/text_3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:hint="text4"
-            />
 
-        <TextView
-            android:layout_below="@id/text_4"
-            android:id="@+id/text_5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:hint="text5"
-            />
 
-        <TextView
-            android:layout_below="@id/text_5"
-            android:id="@+id/text_6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:hint="text6"
-            />
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
 
-    </RelativeLayout>
-
-</android.support.v7.widget.CardView>
+</LinearLayout>

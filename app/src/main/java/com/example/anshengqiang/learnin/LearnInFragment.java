@@ -1,9 +1,11 @@
 package com.example.anshengqiang.learnin;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -74,38 +76,21 @@ public class LearnInFragment extends Fragment {
 
 
     public class EssayListHolder extends RecyclerView.ViewHolder{
-        private ImageView mTitleImageView;
-
-        private TextView mTextView1;
-        private TextView mTextView2;
-        private TextView mTextView3;
-        private TextView mTextView4;
-        private TextView mTextView5;
-        private TextView mTextView6;
+        private TextView mTitleTextView;
+        private ImageView mPostImageView;
+        private CardView mListItemCardView;
 
         public EssayListHolder(View itemView) {
             super(itemView);
-            mTitleImageView = (ImageView) itemView.findViewById(R.id.list_item_essay_image_view);
 
-            mTextView1 = (TextView) itemView.findViewById(R.id.text_1);
-            mTextView2 = (TextView) itemView.findViewById(R.id.text_2);
-            mTextView3 = (TextView) itemView.findViewById(R.id.text_3);
-            mTextView4 = (TextView) itemView.findViewById(R.id.text_4);
-            mTextView5 = (TextView) itemView.findViewById(R.id.text_5);
-            mTextView6 = (TextView) itemView.findViewById(R.id.text_6);
-
+            mTitleTextView = (TextView) itemView.findViewById(R.id.list_item_title_text_view);
+            mPostImageView = (ImageView) itemView.findViewById(R.id.list_item_essay_image_view);
+            mListItemCardView = (CardView) itemView.findViewById(R.id.list_item_essay_card_view);
         }
 
-        public void bindHolder(Essay essay){
-       //     mTitleImageView.setImageResource(R.drawable.sea);
-
-            mTextView1.setText(essay.getId().toString());
-            mTextView2.setText(essay.getTitle());
-            mTextView3.setText(essay.getJsonId());
-            mTextView4.setText(essay.getImage());
-            mTextView5.setText(essay.getCss());
-            mTextView6.setText(essay.getDetail());
-
+        public void bindHolder(Essay essay, Drawable drawable){
+            mTitleTextView.setText(essay.getTitle());
+            mPostImageView.setImageDrawable(drawable);
         }
     }
 
@@ -129,7 +114,9 @@ public class LearnInFragment extends Fragment {
         @Override
         public void onBindViewHolder(EssayListHolder holder, int position) {
             Essay essay = mEssays.get(position);
-            holder.bindHolder(essay);
+
+            Drawable drawable = getResources().getDrawable(R.mipmap.header);
+            holder.bindHolder(essay, drawable);
         }
 
         @Override
