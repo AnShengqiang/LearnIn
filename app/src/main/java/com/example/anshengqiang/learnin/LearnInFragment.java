@@ -1,9 +1,12 @@
 package com.example.anshengqiang.learnin;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.anshengqiang.learnin.fetchr.HexoFetchr;
+import com.example.anshengqiang.learnin.fetchr.PosterImageDownloader;
 import com.example.anshengqiang.learnin.model.Essay;
 import com.example.anshengqiang.learnin.model.EssayLab;
 
@@ -37,6 +41,7 @@ public class LearnInFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
+    private PosterImageDownloader<EssayListHolder> mPosterImageDownloader;
 
     public static LearnInFragment newInstance(){
         return new LearnInFragment();
@@ -59,6 +64,25 @@ public class LearnInFragment extends Fragment {
 
         /*执行AsyncTask线程*/
         new FetchItemTask().execute();
+
+        /*实例化HandlerThread线程*/
+        Handler responseHandler = new Handler();
+        mPosterImageDownloader = new PosterImageDownloader<>(responseHandler);
+
+        /*实现HandlerThread中的接口，方法*/
+        mPosterImageDownloader.setPosterImageDownloadListener(
+                new PosterImageDownloader.PosterImageDownloadListener<EssayListHolder>() {
+                    @Override
+                    public void onPosterImageDownloaded(EssayListHolder target, Bitmap poster) {
+                        Drawable drawable = new BitmapDrawable(getResources(), poster);
+                        target.bindDrawable(drawable);
+                    }
+                }
+        );
+
+        mPosterImageDownloader.start();
+        mPosterImageDownloader.getLooper();
+        Log.i(TAG, "Handler Thread开始运行");
     }
 
     @Override
@@ -72,6 +96,12 @@ public class LearnInFragment extends Fragment {
         updateUI();
 
         return v;
+    }
+
+    @Override
+    public void onDestroyView(){
+        super.onDestroyView();
+        mPosterImageDownloader.clearQueue();
     }
 
 
@@ -88,8 +118,11 @@ public class LearnInFragment extends Fragment {
             mListItemCardView = (CardView) itemView.findViewById(R.id.list_item_essay_card_view);
         }
 
-        public void bindHolder(Essay essay, Drawable drawable){
+        public void bindHolder(Essay essay){
             mTitleTextView.setText(essay.getTitle());
+        }
+
+        public void bindDrawable(Drawable drawable){
             mPostImageView.setImageDrawable(drawable);
         }
     }
@@ -116,7 +149,10 @@ public class LearnInFragment extends Fragment {
             Essay essay = mEssays.get(position);
 
             Drawable drawable = getResources().getDrawable(R.mipmap.header);
-            holder.bindHolder(essay, drawable);
+            holder.bindHolder(essay);
+            holder.bindDrawable(drawable);
+
+            mPosterImageDownloader.queueImageDownloader(holder, essay.getImage());
         }
 
         @Override
@@ -150,6 +186,18 @@ public class LearnInFragment extends Fragment {
             mEssays = items;
             updateUI();
         }
+
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        /**
+         * 此处清理AsyncTask
+         * */
+
+        mPosterImageDownloader.quit();
+        Log.i(TAG, "Handler Thread结束运行");
     }
 
 
