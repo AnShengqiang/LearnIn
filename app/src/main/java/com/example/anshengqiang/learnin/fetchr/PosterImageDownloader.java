@@ -52,7 +52,7 @@ public class PosterImageDownloader<T> extends HandlerThread {
             public void handleMessage(Message msg){
                 if (msg.what == MESSAGE_DOWNLOAD){
                     T target = (T) msg.obj;
-                    Log.i(TAG, "looper获取到一个message， 请求链接： " + mRequestMap.get(target));
+                    //Log.i(TAG, "looper获取到一个message， 请求链接： " + mRequestMap.get(target));
                     handleRequest(target);
                 }
             }
@@ -104,7 +104,7 @@ public class PosterImageDownloader<T> extends HandlerThread {
             byte[] bitmapBytes = new HexoFetchr().getUrlBytes(url);
             final Bitmap bitmap = BitmapFactory
                     .decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
-            Log.i(TAG, "图片下载好了");
+           // Log.i(TAG, "图片下载好了");
 
             /**
              * Message从消息队列取出后， Runnable中的run()方法会执行

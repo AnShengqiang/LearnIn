@@ -4,15 +4,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
 
-import com.example.anshengqiang.learnin.LearnInActivity;
-import com.example.anshengqiang.learnin.LearnInFragment;
-import com.example.anshengqiang.learnin.MyApplication;
 import com.example.anshengqiang.learnin.model.EssayDbSchema.EssayTable;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -137,7 +131,7 @@ public class EssayLab {
                 whereArgs,
                 null,//groupBy
                 null,//having 值约束
-                null //orderBy
+                "_id desc"//orderBy
         );
 
         return new EssayCursorWrapper(cursor);

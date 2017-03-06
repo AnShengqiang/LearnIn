@@ -12,9 +12,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
@@ -71,6 +74,8 @@ public class HexoFetchr {
         }
     }
 
+
+    
     /**
      * 从制定地址获取json数据
      * 存为String格式
@@ -138,7 +143,7 @@ public class HexoFetchr {
                 /*判断字符串是否相等，a.equals(b)*/
                 if (essays.get(j).getJsonId().equals(storyJsonObject.getString("id"))) {
                     isExist = true;
-                    Log.i(TAG, "isExist的值变为" + isExist);
+                    //Log.i(TAG, "isExist的值变为" + isExist);
                     break;
                 }
             }
@@ -192,9 +197,7 @@ public class HexoFetchr {
                 essay.setCss(css);
                 EssayLab.get(context).updateEssay(essay);
 
-                Log.i(TAG, "更新了第" + i + "个Essay");
-            }else {
-                Log.i(TAG, "没有找到特定的Essay来更新");
+                //Log.i(TAG, "分享链接为" + detail);
             }
         }
         return essays;

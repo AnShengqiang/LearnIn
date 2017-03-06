@@ -1,7 +1,8 @@
-package com.example.anshengqiang.learnin;
+package com.example.anshengqiang.learnin.Activity;
 
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
+
+import com.example.anshengqiang.learnin.Fragment.LearnInFragment;
 
 public class LearnInActivity extends SingleFragmentActivity {
 

@@ -26,7 +26,8 @@ public class EssayBaseOpenHelper extends SQLiteOpenHelper{
         /**
          * 此处为SQL语法，table后面要注意空格，
          * 逗号后面也要空格，不然报空指针的诡异错误，
-         * 为什么？*/
+         * 为什么？
+         * */
         db.execSQL("create table " + EssayTable.NAME + "(" +
         " _id integer primary key autoincrement, " +
         EssayTable.Cols.UUID + ", " +

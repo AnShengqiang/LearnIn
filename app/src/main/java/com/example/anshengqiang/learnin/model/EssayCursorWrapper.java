@@ -19,7 +19,7 @@ public class EssayCursorWrapper extends CursorWrapper {
     public EssayCursorWrapper(Cursor cursor) {
         super(cursor);
     }
-
+    /*adsf*/
     /**
      * 从Cursor中取出数据
      * 用数据创建一个Essay
