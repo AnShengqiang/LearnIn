@@ -1,11 +1,15 @@
 package com.example.anshengqiang.learnin.fetchr;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
+
+import com.example.anshengqiang.learnin.MyApplication;
+import com.example.anshengqiang.learnin.libcore.MyDiskLruCache;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,16 +31,19 @@ public class PosterImageDownloader<T> extends HandlerThread {
     private Handler mResponseHandler;
     private PosterImageDownloadListener<T> mPosterImageDownloadListener;
 
-    public interface PosterImageDownloadListener<T>{
+    private MyDiskLruCache mMyDiskLruCache;
+
+    public interface PosterImageDownloadListener<T> {
         void onPosterImageDownloaded(T target, Bitmap poster);
     }
 
-    public void setPosterImageDownloadListener(PosterImageDownloadListener<T> listener){
+    public void setPosterImageDownloadListener(PosterImageDownloadListener<T> listener) {
         mPosterImageDownloadListener = listener;
     }
 
-    public PosterImageDownloader(Handler responseHandler) {
+    public PosterImageDownloader(MyDiskLruCache myDiskLruCache, Handler responseHandler) {
         super(TAG);
+        mMyDiskLruCache = myDiskLruCache;
         mResponseHandler = responseHandler;
     }
 
@@ -44,13 +51,13 @@ public class PosterImageDownloader<T> extends HandlerThread {
      * 此方法在Looper首次检查消息队列之前调用
      * 创建handler的实现
      * 处理对应的消息
-     * */
+     */
     @Override
-    protected void onLooperPrepared(){
-        mRequestHandler = new Handler(){
+    protected void onLooperPrepared() {
+        mRequestHandler = new Handler() {
             @Override
-            public void handleMessage(Message msg){
-                if (msg.what == MESSAGE_DOWNLOAD){
+            public void handleMessage(Message msg) {
+                if (msg.what == MESSAGE_DOWNLOAD) {
                     T target = (T) msg.obj;
                     //Log.i(TAG, "looper获取到一个message， 请求链接： " + mRequestMap.get(target));
                     handleRequest(target);
@@ -60,23 +67,20 @@ public class PosterImageDownloader<T> extends HandlerThread {
     }
 
     @Override
-    public boolean quit(){
+    public boolean quit() {
         mHasQuit = true;
         return super.quit();
     }
 
-
-
     /**
-     * 在hashmap中绑定url和EssayHolder
-     * 从消息循环池中取出一个Message，发送给Handler
-     * */
-    public void queueImageDownloader(T target, String url){
-        Log.i(TAG, "got a url" + url);
+     * 新的消息
+     */
+    public void queueImageDownloader(T target, String url) {
+//        Log.i(TAG, "got a url: " + url);
 
-        if (url == null){
+        if (url == null) {
             mRequestMap.remove(target);
-        }else {
+        } else {
             mRequestMap.put(target, url);
             mRequestHandler.obtainMessage(MESSAGE_DOWNLOAD, target)
                     .sendToTarget();
@@ -84,27 +88,43 @@ public class PosterImageDownloader<T> extends HandlerThread {
     }
 
 
-
-    public void clearQueue(){
+    public void clearQueue() {
         mRequestHandler.removeMessages(MESSAGE_DOWNLOAD);
     }
 
+
     /**
      * 下载图片
-     * */
-    private void handleRequest(final T target){
+     */
+    private void handleRequest(final T target) {
 
         try {
             final String url = mRequestMap.get(target);
 
-            if (url == null){
+            if (url == null) {
                 return;
             }
 
-            byte[] bitmapBytes = new HexoFetchr().getUrlBytes(url);
-            final Bitmap bitmap = BitmapFactory
-                    .decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
-           // Log.i(TAG, "图片下载好了");
+            final Bitmap bitmap;
+
+            if (mMyDiskLruCache.getCachedBitmap(url) == null) {
+                byte[] bitmapBytes = new HexoFetchr().getUrlBytes(url);
+                Log.i(TAG, "下载了一张图片: " + url);
+                Bitmap bitmap1 = BitmapFactory
+                        .decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
+                bitmap = bitmap1;
+                mMyDiskLruCache.writeImage(url, bitmap1);
+            }else {
+                Log.i(TAG, "从缓存取出了一张图片: " + url);
+                Bitmap bitmap1 = mMyDiskLruCache.getCachedBitmap(url);
+                bitmap = bitmap1;
+            }
+
+
+
+
+            //MyDiskLruCache.writeImageThread(new MyApplication().getContext(), url, bitmap);
+            // Log.i(TAG, "图片下载好了");
 
             /**
              * Message从消息队列取出后， Runnable中的run()方法会执行
@@ -112,16 +132,17 @@ public class PosterImageDownloader<T> extends HandlerThread {
             mResponseHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (mRequestMap.get(target) != url || mHasQuit){
+                    if (mRequestMap.get(target) != url || mHasQuit) {
                         return;
                     }
 
                     mRequestMap.remove(target);
+
                     mPosterImageDownloadListener.onPosterImageDownloaded(target, bitmap);
                 }
             });
 
-        } catch (IOException ioe){
+        } catch (IOException ioe) {
             Log.e(TAG, "下载图片出错", ioe);
         }
 

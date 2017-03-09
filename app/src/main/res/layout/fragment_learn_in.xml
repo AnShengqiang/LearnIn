@@ -26,9 +26,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/lawngreen"
-                app:navigationIcon="@drawable/ic_back"
-                app:layout_collapseMode="pin"
-                app:layout_scrollFlags="scroll|snap"/>
+                app:layout_collapseMode="pin"/>
 
         </android.support.design.widget.CollapsingToolbarLayout>
 

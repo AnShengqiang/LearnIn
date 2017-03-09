@@ -64,17 +64,23 @@ public class LearnInFragment extends Fragment {
     private PosterImageDownloader<EssayListHolder> mPosterImageDownloader;
     private Toolbar mToolbar;
     private CollapsingToolbarLayout mCollapsingToolbarLayout;
+    private MyDiskLruCache mMyDiskLruCache;
 
-    //private MyDiskLruCache mMyDiskLruCache;
 
 
     private void initThread() {
-    /*执行AsyncTask线程*/
+
+        /*String imageUrl = "http://img.my.csdn.net/uploads/201309/01/1378037235_7476.jpg";
+        if (MyDiskLruCache.getCachedBitmap(getActivity().getApplication(), imageUrl) == null) {
+            MyDiskLruCache.writeImageThread(getActivity().getApplication(), imageUrl);
+        }*/
+
+        /*执行AsyncTask线程*/
         new FetchItemTask().execute();
 
         /*实例化HandlerThread线程*/
         Handler responseHandler = new Handler();
-        mPosterImageDownloader = new PosterImageDownloader<>(responseHandler);
+        mPosterImageDownloader = new PosterImageDownloader<>(mMyDiskLruCache, responseHandler);
 
         /*实现HandlerThread中的接口，方法*/
         mPosterImageDownloader.setPosterImageDownloadListener(
@@ -108,7 +114,7 @@ public class LearnInFragment extends Fragment {
         mRecyclerView.setAdapter(mAdapter);
     }
 
-    private void updateUI(List<Essay> essays){
+    private void updateUI(List<Essay> essays) {
         mAdapter = new EssayListAdapter(essays);
         mRecyclerView.setAdapter(mAdapter);
     }
@@ -116,6 +122,7 @@ public class LearnInFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mMyDiskLruCache = new MyDiskLruCache(getActivity().getApplicationContext());
         initThread();
     }
 
@@ -200,7 +207,8 @@ public class LearnInFragment extends Fragment {
             Intent intent = DetailActivity.newIntent(getActivity(),
                     mEssay.getDetail(),
                     mEssay.getCss(),
-                    mEssay.getImage());
+                    mEssay.getImage(),
+                    mEssay.getTitle());
             Log.i(TAG, "点击了一个卡片:" + mEssay.getTitle());
             startActivity(intent);
         }
@@ -228,15 +236,13 @@ public class LearnInFragment extends Fragment {
         public void onBindViewHolder(EssayListHolder holder, int position) {
             Essay essay = mEssays.get(position);
 
-            new MyDiskLruCache(getActivity(), essay.getImage());
             //Drawable drawable = getResources().getDrawable(R.mipmap.header);
             holder.bindTitle(essay);
             //holder.bindDrawable(drawable);
             holder.bindEssay(essay);
-            mPosterImageDownloader.queueImageDownloader(holder, essay.getImage());
+//          MyDiskLruCache.writeImageThread(getActivity().getApplication(), "0");
 
-            //mMyDiskLruCache = new MyDiskLruCache(getActivity(), essay.getImage());
-            //mMyDiskLruCache.execThread();
+            mPosterImageDownloader.queueImageDownloader(holder, essay.getImage());
 
         }
 

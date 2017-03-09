@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -17,8 +18,11 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.anshengqiang.learnin.R;
+import com.example.anshengqiang.learnin.fetchr.PosterImageDownloader;
+import com.example.anshengqiang.learnin.libcore.MyDiskLruCache;
 
 /**
  * Created by anshengqiang on 2017/3/4.
@@ -28,6 +32,7 @@ public class DetailFragment extends Fragment {
     private static final String ARG_DETAIL = "page_detail";
     private static final String ARG_CSS = "page_css";
     private static final String ARG_IMAGE = "page_image";
+    private static final String ARG_TITLE = "page_title";
 
     private static final String TAG = "DetailFragment";
 
@@ -36,16 +41,19 @@ public class DetailFragment extends Fragment {
     private WebView mWebView;
     private Toolbar mToolBar;
     private ImageView mImageView;
-    private NestedScrollView mNestedScrollView;
+    private TextView mTextView;
     CollapsingToolbarLayout mCollapsingToolbarLayout;
 
 
-
-    public static DetailFragment newInstance(String pageDetail, String css, String imageString){
+    public static DetailFragment newInstance(String pageDetail,
+                                             String css,
+                                             String imageString,
+                                             String titleString) {
         Bundle args = new Bundle();
         args.putSerializable(ARG_DETAIL, pageDetail);
         args.putSerializable(ARG_CSS, css);
         args.putSerializable(ARG_IMAGE, imageString);
+        args.putSerializable(ARG_TITLE, titleString);
 
         DetailFragment fragment = new DetailFragment();
         fragment.setArguments(args);
@@ -59,6 +67,8 @@ public class DetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
+        Handler responseHandler = new Handler();
+
         mPageDetail = getArguments().getSerializable(ARG_DETAIL).toString();
         mPageCss = getArguments().getSerializable(ARG_CSS).toString();
     }
@@ -70,6 +80,7 @@ public class DetailFragment extends Fragment {
                              Bundle savedInstanceState){
         View v = inflater.inflate(R.layout.fragment_detail, parent, false);
 
+
         mToolBar = (Toolbar) v.findViewById(R.id.fragment_detail_tool_bar);
 
         mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -78,23 +89,13 @@ public class DetailFragment extends Fragment {
                 getActivity().finish();
             }
         });
-        //使用CollapsingToolbarLayout必须把title设置到CollapsingToolbarLayout上，设置到Toolbar上则不会显示
-        mCollapsingToolbarLayout = (CollapsingToolbarLayout) v.findViewById(R.id.collapsing_toolbar);
-        mCollapsingToolbarLayout.setTitle("文章标题");
-        //通过CollapsingToolbarLayout修改字体颜色
-        mCollapsingToolbarLayout.setExpandedTitleColor(Color.WHITE);//设置还没收缩时状态下字体颜色
-        mCollapsingToolbarLayout.setCollapsedTitleTextColor(Color.WHITE);//设置收缩后Toolbar上字体的颜色
 
         mImageView = (ImageView) v.findViewById(R.id.detail_poster_image);
-        mImageView.setImageURI(Uri.parse(getArguments().getString(ARG_IMAGE)));
+        mImageView.setImageBitmap(MyDiskLruCache.getCachedBitmap(getArguments().getString(ARG_IMAGE)));
 
-        mNestedScrollView = (NestedScrollView) v.findViewById(R.id.web_nested_scroll_view);
-        mNestedScrollView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i(TAG, "点击了NestedScrollView");
-            }
-        });
+        mTextView = (TextView) v.findViewById(R.id.detail_bar_title);
+        Log.i(TAG, "接收到的title是： " + getArguments().getString(ARG_TITLE));
+        mTextView.setText(getArguments().getString(ARG_TITLE));
 
         mWebView = (WebView) v.findViewById(R.id.fragment_detail_web_view);
         mWebView.getSettings().setJavaScriptEnabled(true);
@@ -114,7 +115,7 @@ public class DetailFragment extends Fragment {
         mWebView.loadDataWithBaseURL("", mPageDetail, "text/html; charset=utf-8", "utf-8", null);
         mWebView.setWebChromeClient(new WebChromeClient());
 
-        Log.i(TAG, "正文是：" + mPageDetail);
+//        Log.i(TAG, "正文是：" + mPageDetail);
 
         return v;
     }
