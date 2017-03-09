@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -12,14 +13,20 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.LruCache;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -51,11 +58,13 @@ public class LearnInFragment extends Fragment {
     private static final String TAG = "LearnInFragment";
 
     private static final String ZHI_HU = "http://news-at.zhihu.com/api/4/news/";
-    private List<Essay> mEssays;
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private PosterImageDownloader<EssayListHolder> mPosterImageDownloader;
+    private Toolbar mToolbar;
+    private CollapsingToolbarLayout mCollapsingToolbarLayout;
+
     //private MyDiskLruCache mMyDiskLruCache;
 
 
@@ -99,13 +108,20 @@ public class LearnInFragment extends Fragment {
         mRecyclerView.setAdapter(mAdapter);
     }
 
+    private void updateUI(List<Essay> essays){
+        mAdapter = new EssayListAdapter(essays);
+        mRecyclerView.setAdapter(mAdapter);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         initThread();
+    }
 
-
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
 
@@ -117,10 +133,33 @@ public class LearnInFragment extends Fragment {
         mRecyclerView = (RecyclerView) v.findViewById(R.id.learnin_recycler_view);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 1));
 
+        mToolbar = (Toolbar) v.findViewById(R.id.learnin_tool_bar);
+        mToolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Snackbar.make(v, R.string.hello, Snackbar.LENGTH_SHORT)
+                        .setAction("cancel", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                //这里的单击事件代表点击消除Action后的响应事件
+
+                            }
+                        })
+                        .show();
+            }
+        });
+        mCollapsingToolbarLayout = (CollapsingToolbarLayout)
+                v.findViewById(R.id.learnin_collapsing_toolbar);
+        mCollapsingToolbarLayout.setTitle("你好呀");
+        //通过CollapsingToolbarLayout修改字体颜色
+        mCollapsingToolbarLayout.setExpandedTitleColor(Color.BLACK);//设置还没收缩时状态下字体颜色
+        mCollapsingToolbarLayout.setCollapsedTitleTextColor(Color.WHITE);//设置收缩后Toolbar上字体的颜色
+
         updateUI();
 
         return v;
     }
+
 
     @Override
     public void onDestroyView() {
@@ -160,7 +199,8 @@ public class LearnInFragment extends Fragment {
         public void onClick(View view) {
             Intent intent = DetailActivity.newIntent(getActivity(),
                     mEssay.getDetail(),
-                    mEssay.getCss());
+                    mEssay.getCss(),
+                    mEssay.getImage());
             Log.i(TAG, "点击了一个卡片:" + mEssay.getTitle());
             startActivity(intent);
         }
@@ -182,6 +222,7 @@ public class LearnInFragment extends Fragment {
 
             return new EssayListHolder(itemView);
         }
+
 
         @Override
         public void onBindViewHolder(EssayListHolder holder, int position) {
@@ -212,9 +253,10 @@ public class LearnInFragment extends Fragment {
         @Override
         protected List<Essay> doInBackground(Void... params) {
             HexoFetchr fetchr = new HexoFetchr();
+            Context context = getActivity().getApplicationContext();
             try {
-                fetchr.fetchLatest(getActivity().getApplicationContext(), ZHI_HU);
-                mItems = fetchr.fetchDetail(getActivity().getApplicationContext(), ZHI_HU);
+                fetchr.fetchLatest(context, ZHI_HU);
+                mItems = fetchr.fetchDetail(context, ZHI_HU);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
@@ -226,9 +268,9 @@ public class LearnInFragment extends Fragment {
 
         /*此方法接受doInBackground返回的参数，在线程完成的时候自动调用*/
         @Override
-        protected void onPostExecute(List<Essay> items) {
-            mEssays = items;
-            updateUI();
+        protected void onPostExecute(List<Essay> essays) {
+            mItems = essays;
+            updateUI(mItems);
         }
 
     }

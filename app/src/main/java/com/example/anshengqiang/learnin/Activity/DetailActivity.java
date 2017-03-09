@@ -12,11 +12,13 @@ public class DetailActivity extends SingleFragmentActivity {
 
     private static final String EXTRA_DETAIL = "com.example.anshengqiang.learnin.page_detail";
     private static final String EXTRA_CSS = "com.example.anshengqiang.learnin.css";
+    private static final String EXTRA_IMAGE = "com.example.anshengqiang.learnin.image";
 
-    public static Intent newIntent(Context context, String pageDetail, String css){
+    public static Intent newIntent(Context context, String pageDetail, String css, String image){
         Intent intent = new Intent(context, DetailActivity.class);
         intent.putExtra(EXTRA_DETAIL, pageDetail);
         intent.putExtra(EXTRA_CSS, css);
+        intent.putExtra(EXTRA_IMAGE, image);
         return intent;
     }
 
@@ -24,6 +26,7 @@ public class DetailActivity extends SingleFragmentActivity {
     protected Fragment createFragment() {
 
         return new DetailFragment().newInstance(this.getIntent().getStringExtra(EXTRA_DETAIL),
-                this.getIntent().getStringExtra(EXTRA_CSS));
+                this.getIntent().getStringExtra(EXTRA_CSS),
+                this.getIntent().getStringExtra(EXTRA_IMAGE));
     }
 }

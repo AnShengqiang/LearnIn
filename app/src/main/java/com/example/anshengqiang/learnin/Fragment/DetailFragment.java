@@ -1,10 +1,14 @@
 package com.example.anshengqiang.learnin.Fragment;
 
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.widget.NestedScrollView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +16,7 @@ import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ProgressBar;
+import android.widget.ImageView;
 
 import com.example.anshengqiang.learnin.R;
 
@@ -23,20 +27,25 @@ import com.example.anshengqiang.learnin.R;
 public class DetailFragment extends Fragment {
     private static final String ARG_DETAIL = "page_detail";
     private static final String ARG_CSS = "page_css";
+    private static final String ARG_IMAGE = "page_image";
 
     private static final String TAG = "DetailFragment";
 
     private String mPageDetail;
     private String mPageCss;
     private WebView mWebView;
-    private ProgressBar mProgressBar;
+    private Toolbar mToolBar;
+    private ImageView mImageView;
+    private NestedScrollView mNestedScrollView;
+    CollapsingToolbarLayout mCollapsingToolbarLayout;
 
 
 
-    public static DetailFragment newInstance(String pageDetail, String css){
+    public static DetailFragment newInstance(String pageDetail, String css, String imageString){
         Bundle args = new Bundle();
         args.putSerializable(ARG_DETAIL, pageDetail);
         args.putSerializable(ARG_CSS, css);
+        args.putSerializable(ARG_IMAGE, imageString);
 
         DetailFragment fragment = new DetailFragment();
         fragment.setArguments(args);
@@ -61,27 +70,35 @@ public class DetailFragment extends Fragment {
                              Bundle savedInstanceState){
         View v = inflater.inflate(R.layout.fragment_detail, parent, false);
 
-        mProgressBar = (ProgressBar) v.findViewById(R.id.fragment_detail_progress_bar);
-        mProgressBar.setMax(100);
+        mToolBar = (Toolbar) v.findViewById(R.id.fragment_detail_tool_bar);
+
+        mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().finish();
+            }
+        });
+        //使用CollapsingToolbarLayout必须把title设置到CollapsingToolbarLayout上，设置到Toolbar上则不会显示
+        mCollapsingToolbarLayout = (CollapsingToolbarLayout) v.findViewById(R.id.collapsing_toolbar);
+        mCollapsingToolbarLayout.setTitle("文章标题");
+        //通过CollapsingToolbarLayout修改字体颜色
+        mCollapsingToolbarLayout.setExpandedTitleColor(Color.WHITE);//设置还没收缩时状态下字体颜色
+        mCollapsingToolbarLayout.setCollapsedTitleTextColor(Color.WHITE);//设置收缩后Toolbar上字体的颜色
+
+        mImageView = (ImageView) v.findViewById(R.id.detail_poster_image);
+        mImageView.setImageURI(Uri.parse(getArguments().getString(ARG_IMAGE)));
+
+        mNestedScrollView = (NestedScrollView) v.findViewById(R.id.web_nested_scroll_view);
+        mNestedScrollView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "点击了NestedScrollView");
+            }
+        });
 
         mWebView = (WebView) v.findViewById(R.id.fragment_detail_web_view);
         mWebView.getSettings().setJavaScriptEnabled(true);
-        mWebView.setWebChromeClient(new WebChromeClient(){
-            @Override
-            public void onProgressChanged(WebView webView, int newProgress){
-                if (newProgress == 100){
-                    mProgressBar.setVisibility(View.GONE);
-                }else {
-                    mProgressBar.setVisibility(View.VISIBLE);
-                    mProgressBar.setProgress(newProgress);
-                }
-            }
 
-            public void onReceivedTitle(WebView webView, String title){
-                AppCompatActivity activity = (AppCompatActivity) getActivity();
-                activity.getSupportActionBar().setSubtitle(title);
-            }
-        });
         mWebView.setWebViewClient(new WebViewClient(){
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url){
@@ -92,8 +109,9 @@ public class DetailFragment extends Fragment {
 
         mPageCss = mPageCss.substring(1, mPageCss.length() - 2);
         mPageDetail = "<link rel=\"stylesheet\" href=" + mPageCss + " type=\"text/css\" />" + mPageDetail;
+        mPageDetail = "<style>div.headline{display:none;}</style>" + mPageDetail;
 
-        mWebView.loadDataWithBaseURL("",mPageDetail, "text/html", "utf-8", null);
+        mWebView.loadDataWithBaseURL("", mPageDetail, "text/html; charset=utf-8", "utf-8", null);
         mWebView.setWebChromeClient(new WebChromeClient());
 
         Log.i(TAG, "正文是：" + mPageDetail);

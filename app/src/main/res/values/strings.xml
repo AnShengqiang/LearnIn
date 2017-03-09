@@ -2,4 +2,10 @@
     <string name="app_name">LearnIn</string>
 
     <string name="title_image">the title image</string>
+
+    <string name="tool_bar_title">看世界-探索未知的奥秘</string>
+
+    <string name="tool_bar_back">返回</string>
+
+    <string name="hello">你好呀 (^——^)v</string>
 </resources>
