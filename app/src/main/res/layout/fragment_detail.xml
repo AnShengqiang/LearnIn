@@ -50,7 +50,7 @@
                     android:maxLines="3"
                     android:textColor="@color/white"
                     android:textSize="22sp"
-                    tools:text="诺基亚新出了安卓机，这是我们的体验报告"/>
+                    tools:text="你好呀"/>
 
             </FrameLayout>
 
@@ -59,7 +59,8 @@
                 android:id="@+id/fragment_detail_tool_bar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="none"
+                app:layout_collapseMode="pin"
+                app:layout_collapseParallaxMultiplier="0.7"
                 app:navigationIcon="@drawable/ic_back"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 

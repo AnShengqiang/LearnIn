@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.example.anshengqiang.learnin.model.EssayDbSchema.EssayTable;
 
@@ -16,6 +18,8 @@ import java.util.UUID;
  */
 
 public class EssayLab {
+
+    private static final String TAG = "EssayLab";
 
     private static EssayLab sEssayLab;
     private Context mContext;
@@ -41,10 +45,17 @@ public class EssayLab {
     }
 
     /*获取essay数组*/
-    public List<Essay> getEssays(){
+    public List<Essay> getEssays(String category){
         List<Essay> essays = new ArrayList<>();
+        String[] categorys = {category};
+        EssayCursorWrapper essayCursorWrapper;
 
-        EssayCursorWrapper essayCursorWrapper = queryEssays(null, null);
+        if (category == null){
+            essayCursorWrapper = queryEssays(null, null);
+        }else {
+            essayCursorWrapper = queryEssays("CATEGORY = ?", categorys);
+            //Log.i(TAG, "category is: " + category);
+        }
         essayCursorWrapper.moveToFirst();
         while(!essayCursorWrapper.isAfterLast()){
             essays.add(essayCursorWrapper.getEssay());
@@ -104,14 +115,13 @@ public class EssayLab {
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(EssayTable.Cols.UUID, essay.getId().toString());
+        contentValues.put(EssayTable.Cols.CATEGORY, essay.getCategory());
         contentValues.put(EssayTable.Cols.DETAIL, essay.getDetail());
         contentValues.put(EssayTable.Cols.TITLE, essay.getTitle());
         contentValues.put(EssayTable.Cols.JSONID, essay.getJsonId());
         contentValues.put(EssayTable.Cols.CSS, essay.getCss());
         contentValues.put(EssayTable.Cols.IMAGE, essay.getImage());
         contentValues.put(EssayTable.Cols.DATE, essay.getDate().toString());
-
-
 
         /*try {
             coverStream.close();

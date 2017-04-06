@@ -2,33 +2,19 @@ package com.example.anshengqiang.learnin.Fragment;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.util.LruCache;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -38,34 +24,34 @@ import com.example.anshengqiang.learnin.Activity.DetailActivity;
 import com.example.anshengqiang.learnin.R;
 import com.example.anshengqiang.learnin.fetchr.HexoFetchr;
 import com.example.anshengqiang.learnin.fetchr.PosterImageDownloader;
-import com.example.anshengqiang.learnin.libcore.DiskLruCache;
 import com.example.anshengqiang.learnin.libcore.MyDiskLruCache;
 import com.example.anshengqiang.learnin.model.Essay;
 import com.example.anshengqiang.learnin.model.EssayLab;
 
 import org.json.JSONException;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.security.MessageDigest;
 import java.util.List;
 
 /**
  * Created by anshengqiang on 2017/2/27.
  */
 
-public class LearnInFragment extends Fragment {
+public class PagerContentFragment extends Fragment {
 
-    private static final String TAG = "LearnInFragment";
+    private static final String ARG_CATEGORY = "category";
+    private static final String ZHI_HU_LATEST = "http://news-at.zhihu.com/api/4/news/latest";
+    private static final String ZHI_HU_FUN = "http://news-at.zhihu.com/api/3/section/2";
+    private static final String ZHI_HU_STORY = "http://news-at.zhihu.com/api/3/section/29";
+    private static final String ZHI_HU_NIGHT = "http://news-at.zhihu.com/api/3/section/1";
 
-    private static final String ZHI_HU = "http://news-at.zhihu.com/api/4/news/latest";
+    private static final String TAG = "PagerContentFragment";
+
+    private static final String ZHI_HU = "http://news-at.zhihu.com/api/4/news/";
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private PosterImageDownloader<EssayListHolder> mPosterImageDownloader;
-    private Toolbar mToolbar;
-    private CollapsingToolbarLayout mCollapsingToolbarLayout;
     private MyDiskLruCache mMyDiskLruCache;
 
 
@@ -96,8 +82,14 @@ public class LearnInFragment extends Fragment {
         Log.i(TAG, "Handler Thread开始运行");
     }
 
-    public static LearnInFragment newInstance() {
-        return new LearnInFragment();
+    public static PagerContentFragment newInstance(String s) {
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(ARG_CATEGORY, s);
+
+        PagerContentFragment pagerContentFragment = new PagerContentFragment();
+        pagerContentFragment.setArguments(bundle);
+
+        return pagerContentFragment;
     }
 
     /**
@@ -105,7 +97,7 @@ public class LearnInFragment extends Fragment {
      */
     private void updateUI() {
         EssayLab essayLab = EssayLab.get(getActivity());
-        List<Essay> essays = essayLab.getEssays(null);
+        List<Essay> essays = essayLab.getEssays(getArguments().getString(ARG_CATEGORY));
 
         mAdapter = new EssayListAdapter(essays);
         mRecyclerView.setAdapter(mAdapter);
@@ -132,32 +124,10 @@ public class LearnInFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_learn_in, container, false);
+        View v = inflater.inflate(R.layout.fragment_pager_content, container, false);
 
-        mRecyclerView = (RecyclerView) v.findViewById(R.id.learnin_recycler_view);
+        mRecyclerView = (RecyclerView) v.findViewById(R.id.tab_content_recycler_view);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 1));
-
-        mToolbar = (Toolbar) v.findViewById(R.id.learnin_tool_bar);
-        mToolbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Snackbar.make(v, R.string.hello, Snackbar.LENGTH_SHORT)
-                        .setAction("cancel", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                //这里的单击事件代表点击消除Action后的响应事件
-
-                            }
-                        })
-                        .show();
-            }
-        });
-        mCollapsingToolbarLayout = (CollapsingToolbarLayout)
-                v.findViewById(R.id.learnin_collapsing_toolbar);
-        mCollapsingToolbarLayout.setTitle("^_^你好呀 ↑");
-        //通过CollapsingToolbarLayout修改字体颜色
-        mCollapsingToolbarLayout.setExpandedTitleColor(Color.BLACK);//设置还没收缩时状态下字体颜色
-        mCollapsingToolbarLayout.setCollapsedTitleTextColor(Color.WHITE);//设置收缩后Toolbar上字体的颜色
 
         updateUI();
 
@@ -218,6 +188,9 @@ public class LearnInFragment extends Fragment {
         public EssayListAdapter(List<Essay> essays) {
             super();
             mEssays = essays;
+            if (mEssays == null) {
+                Log.i(TAG, "mEssays is null");
+            }
         }
 
         @Override
@@ -233,11 +206,8 @@ public class LearnInFragment extends Fragment {
         public void onBindViewHolder(EssayListHolder holder, int position) {
             Essay essay = mEssays.get(position);
 
-            //Drawable drawable = getResources().getDrawable(R.mipmap.header);
             holder.bindTitle(essay);
-            //holder.bindDrawable(drawable);
             holder.bindEssay(essay);
-//          MyDiskLruCache.writeImageThread(getActivity().getApplication(), "0");
 
             mPosterImageDownloader.queueImageDownloader(holder, essay.getImage());
 
@@ -245,7 +215,11 @@ public class LearnInFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return mEssays.size();
+            if (mEssays != null) {
+                return mEssays.size();
+            }else {
+                return 0;
+            }
         }
     }
 
@@ -258,8 +232,23 @@ public class LearnInFragment extends Fragment {
             HexoFetchr fetchr = new HexoFetchr();
             Context context = getActivity().getApplicationContext();
             try {
-                fetchr.fetchLatest(context, ZHI_HU, null);
-                mItems = fetchr.fetchDetail(context, ZHI_HU, null);
+                String category = getArguments().getString(ARG_CATEGORY);
+                switch (category){
+                    case "吐槽":
+                        fetchr.fetchLatest(context, ZHI_HU_FUN, "吐槽");
+                        mItems = fetchr.fetchDetail(context, ZHI_HU, "吐槽");
+                        break;
+                    case "热文":
+                        fetchr.fetchLatest(context, ZHI_HU_NIGHT, "热文");
+                        mItems = fetchr.fetchDetail(context, ZHI_HU, "热文");
+                        break;
+                    case "大误":
+                        fetchr.fetchLatest(context, ZHI_HU_STORY, "大误");
+                        mItems = fetchr.fetchDetail(context, ZHI_HU, "大误");
+                        break;
+                    default:
+                        break;
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
@@ -289,21 +278,6 @@ public class LearnInFragment extends Fragment {
         Log.i(TAG, "Handler Thread结束运行");
     }
 
-    public static boolean isNetworkAvailable(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm != null) {
-            NetworkInfo[] info = cm.getAllNetworkInfo();
-            if (info != null) {
-                for (int i = 0; i < info.length; i++) {
-                    if (info[i].getState() == NetworkInfo.State.CONNECTED) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
 
 
 }

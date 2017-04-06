@@ -23,6 +23,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -36,7 +37,7 @@ public class HexoFetchr {
 
 
     /**
-     * 从制定网址获取Json数据
+     * 从指定网址获取Json数据
      * 存入byte[]
      */
     public byte[] getUrlBytes(String urlSpec) throws IOException {
@@ -75,7 +76,7 @@ public class HexoFetchr {
     }
 
 
-    
+
     /**
      * 从制定地址获取json数据
      * 存为String格式
@@ -88,21 +89,35 @@ public class HexoFetchr {
      * 连接最新文章列表
      * 获取json
      */
-    public List<Essay> fetchLatest(Context context, String url) throws IOException, JSONException {
+    public List<Essay> fetchLatest(Context context, String url, String category) throws IOException, JSONException {
+        String jsonList = getUrlString(url);
+        JSONObject jsonObject = new JSONObject(jsonList);
+
+        return parseLatest(context, jsonObject, category);
+    }
+/*
+    public List<Essay> fetchFun(Context context, String url) throws IOException, JSONException {
         String jsonList = getUrlString(url + "latest");
         JSONObject jsonObject = new JSONObject(jsonList);
 
         return parseLatest(context, jsonObject);
     }
 
+    public List<Essay> fetchPsychology(Context context, String url) throws IOException, JSONException {
+        String jsonList = getUrlString(url + "latest");
+        JSONObject jsonObject = new JSONObject(jsonList);
+
+        return parseLatest(context, jsonObject);
+    }*/
+
     /**
      * 连接文章页面
      * 获取json
      * 调用parseDetail 方法，解析文章json
      */
-    public List<Essay> fetchDetail(Context context, String _url) {
+    public List<Essay> fetchDetail(Context context, String _url, String category) {
 
-        List<Essay> essays = EssayLab.get(context).getEssays();
+        List<Essay> essays = EssayLab.get(context).getEssays(category);
 
         for (int i = 0; i < essays.size(); i++) {
 
@@ -112,7 +127,7 @@ public class HexoFetchr {
             try {
                 String jsonDetail = getUrlString(url);
                 JSONObject jsonObject = new JSONObject(jsonDetail);
-                essays = parseDetail(context, jsonObject);
+                essays = parseDetail(context, jsonObject, category);
 
             } catch (IOException e) {
                 Log.i(TAG, "Failed to fetch Detail", e);
@@ -127,23 +142,22 @@ public class HexoFetchr {
     /**
      * 解析文章列表json
      */
-    private List<Essay> parseLatest(Context context, JSONObject jsonList)
+    private List<Essay> parseLatest(Context context, JSONObject jsonList, String category)
             throws IOException, JSONException {
 
-        List<Essay> essays = EssayLab.get(context).getEssays();
-        JSONArray topStoriesJsonArray = jsonList.getJSONArray("top_stories");
-        /*数据库中是否"已经存在"该文章*/
-        boolean isExist = false;
+        List<Essay> essays = EssayLab.get(context).getEssays(category);
+        JSONArray topStoriesJsonArray = jsonList.getJSONArray("stories");
 
         for (int i = 0; i < topStoriesJsonArray.length(); i++) {
             JSONObject storyJsonObject = topStoriesJsonArray.getJSONObject(i);
 
-            /*遍历essays，寻找是否存在相同id。若相同，则已经存在该文章*/
+            /*数据库中是否"已经存在"该文章*/
+            boolean isExist = false;
             for (int j = 0; j < essays.size(); j++) {
                 /*判断字符串是否相等，a.equals(b)*/
                 if (essays.get(j).getJsonId().equals(storyJsonObject.getString("id"))) {
                     isExist = true;
-                    //Log.i(TAG, "isExist的值变为" + isExist);
+                    Log.i(TAG, "isExist的值变为" + isExist);
                     break;
                 }
             }
@@ -151,29 +165,29 @@ public class HexoFetchr {
                 /*新建一个Essay，存入数据*/
                 Essay essay = new Essay();
 
+                essay.setCategory(category);
                 essay.setDate(new Date());                                                          //测试完之后，需要更改
-
                 essay.setTitle(storyJsonObject.getString("title"));
                 essay.setJsonId(storyJsonObject.getString("id"));
 
-                if (!storyJsonObject.has("image")) {
-                    continue;
-                }
-
-                essay.setImage(storyJsonObject.getString("image"));
+                /*JSONArray imageArray = storyJsonObject.getJSONArray("images");
+                String image = imageArray.toString();
+                image = image.substring(2, 67);
+                Log.i(TAG, "image url is:" + image);
+                essay.setImage(image);*/
 
                 EssayLab.get(context).addEssay(essay);
-                Log.i(TAG, "添加了一个Essay，isExist = " + isExist);
+                Log.i(TAG, "添加了一个Essay，isExist = " + isExist +"title is:" + essay.getTitle());
             }
         }
 
-        return EssayLab.get(context).getEssays();                                           //假如直接使用essays能不能刷新？
+        return EssayLab.get(context).getEssays(category);                                                   //假如直接使用essays能不能刷新？
     }
 
     /**
      * 解析文章json
      */
-    private List<Essay> parseDetail(Context context, JSONObject jsonDetail)
+    private List<Essay> parseDetail(Context context, JSONObject jsonDetail, String category)
             throws IOException, JSONException {
 
         /**
@@ -186,7 +200,8 @@ public class HexoFetchr {
 
         String jsonId = jsonDetail.getString("id");
         String detail = jsonDetail.getString("body");
-        List<Essay> essays = EssayLab.get(context).getEssays();
+        String image = jsonDetail.getString("image");
+        List<Essay> essays = EssayLab.get(context).getEssays(category);
 
         /*遍历id，找出特定的Essay*/
         for (int i = 0; i < essays.size(); i++) {
@@ -195,6 +210,7 @@ public class HexoFetchr {
 
                 essay.setDetail(detail);
                 essay.setCss(css);
+                essay.setImage(image);
                 EssayLab.get(context).updateEssay(essay);
 
                 //Log.i(TAG, "分享链接为" + detail);

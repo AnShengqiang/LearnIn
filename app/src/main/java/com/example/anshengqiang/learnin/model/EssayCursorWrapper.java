@@ -29,6 +29,7 @@ public class EssayCursorWrapper extends CursorWrapper {
         String uuidString = getString(getColumnIndex(EssayTable.Cols.UUID));
         String detail = getString(getColumnIndex(EssayTable.Cols.DETAIL));
         String title = getString(getColumnIndex(EssayTable.Cols.TITLE));
+        String category = getString(getColumnIndex(EssayTable.Cols.CATEGORY));
 
         String jsonid = getString(getColumnIndex(EssayTable.Cols.JSONID));
         String image = getString(getColumnIndex(EssayTable.Cols.IMAGE));
@@ -39,6 +40,7 @@ public class EssayCursorWrapper extends CursorWrapper {
         Essay essay = new Essay(UUID.fromString(uuidString));
         essay.setTitle(title);
         essay.setDetail(detail);
+        essay.setCategory(category);
 
         essay.setJsonId(jsonid);
         essay.setImage(image);

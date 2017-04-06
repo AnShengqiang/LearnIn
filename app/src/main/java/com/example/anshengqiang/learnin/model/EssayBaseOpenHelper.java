@@ -31,6 +31,7 @@ public class EssayBaseOpenHelper extends SQLiteOpenHelper{
         db.execSQL("create table " + EssayTable.NAME + "(" +
         " _id integer primary key autoincrement, " +
         EssayTable.Cols.UUID + ", " +
+        EssayTable.Cols.CATEGORY + ", " +
         EssayTable.Cols.TITLE + ", " +
         EssayTable.Cols.DETAIL + ", " +
         EssayTable.Cols.IMAGE + ", " +

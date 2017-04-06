@@ -19,6 +19,7 @@ public class Essay {
     private String mCss;
     private Date mDate;
     private String mImage;
+    private String mCategory;
 
 
 
@@ -88,5 +89,13 @@ public class Essay {
 
     public void setCss(String css) {
         mCss = css;
+    }
+
+    public String getCategory() {
+        return mCategory;
+    }
+
+    public void setCategory(String category) {
+        mCategory = category;
     }
 }
