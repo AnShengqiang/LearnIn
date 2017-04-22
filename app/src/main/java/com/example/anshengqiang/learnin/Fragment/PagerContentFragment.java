@@ -163,7 +163,6 @@ public class PagerContentFragment extends Fragment {
 
         public void bindDrawable(Drawable drawable) {
             mPostImageView.setImageDrawable(drawable);
-
         }
 
         public void bindEssay(Essay essay) {
@@ -238,9 +237,9 @@ public class PagerContentFragment extends Fragment {
                         fetchr.fetchLatest(context, ZHI_HU_FUN, "吐槽");
                         mItems = fetchr.fetchDetail(context, ZHI_HU, "吐槽");
                         break;
-                    case "热文":
-                        fetchr.fetchLatest(context, ZHI_HU_NIGHT, "热文");
-                        mItems = fetchr.fetchDetail(context, ZHI_HU, "热文");
+                    case "惊奇":
+                        fetchr.fetchLatest(context, ZHI_HU_NIGHT, "惊奇");
+                        mItems = fetchr.fetchDetail(context, ZHI_HU, "惊奇");
                         break;
                     case "大误":
                         fetchr.fetchLatest(context, ZHI_HU_STORY, "大误");

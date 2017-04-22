@@ -1,8 +1,5 @@
 <component name="libraryTable">
   <library name="support-core-utils-25.2.0">
-    <ANNOTATIONS>
-      <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.android.support/support-core-utils/25.2.0/annotations.zip!/" />
-    </ANNOTATIONS>
     <CLASSES>
       <root url="file://$USER_HOME$/.android/build-cache/c3061499a92ceb8cebe94bd3ab591f4b15d30fd0/output/res" />
       <root url="jar://$USER_HOME$/.android/build-cache/c3061499a92ceb8cebe94bd3ab591f4b15d30fd0/output/jars/classes.jar!/" />

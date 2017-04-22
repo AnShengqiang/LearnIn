@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.anshengqiang.learnin.MyApplication;
 import com.example.anshengqiang.learnin.model.Essay;
 import com.example.anshengqiang.learnin.model.EssayLab;
 

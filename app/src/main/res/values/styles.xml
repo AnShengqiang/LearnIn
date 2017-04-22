@@ -14,8 +14,8 @@
     </style>
 
     <style name="MainTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/lawngreen</item>
-        <item name="colorPrimaryDark">@color/green</item>
+        <item name="colorPrimary">#57D2F7</item>
+        <item name="colorPrimaryDark">#726DD1</item>
         <item name="colorAccent">@color/lightblue</item>
 
         <item name="android:colorBackground">@color/gainsboro</item>

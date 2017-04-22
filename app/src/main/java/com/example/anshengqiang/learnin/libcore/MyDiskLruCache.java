@@ -191,7 +191,7 @@ public class MyDiskLruCache {
             if (!cacheDir.exists()) {
                 cacheDir.mkdirs();
             }
-            mDiskLruCache = DiskLruCache.open(cacheDir, getAppVersion(context), 1, 10 * 1024 * 1024);
+            mDiskLruCache = DiskLruCache.open(cacheDir, getAppVersion(context), 1, 200 * 1024 * 1024);
             return mDiskLruCache;
         } catch (IOException e) {
             e.printStackTrace();

@@ -1,6 +1,5 @@
 package com.example.anshengqiang.learnin.fetchr;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -8,7 +7,6 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 
-import com.example.anshengqiang.learnin.MyApplication;
 import com.example.anshengqiang.learnin.libcore.MyDiskLruCache;
 
 import java.io.IOException;
@@ -119,12 +117,6 @@ public class PosterImageDownloader<T> extends HandlerThread {
                 Bitmap bitmap1 = mMyDiskLruCache.getCachedBitmap(url);
                 bitmap = bitmap1;
             }
-
-
-
-
-            //MyDiskLruCache.writeImageThread(new MyApplication().getContext(), url, bitmap);
-            // Log.i(TAG, "图片下载好了");
 
             /**
              * Message从消息队列取出后， Runnable中的run()方法会执行
