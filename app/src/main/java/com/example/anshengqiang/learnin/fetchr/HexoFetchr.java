@@ -88,11 +88,11 @@ public class HexoFetchr {
      * 连接最新文章列表
      * 获取json
      */
-    public List<Essay> fetchLatest(Context context, String url, String category) throws IOException, JSONException {
+    public List<Essay> fetchList(Context context, String url, String category) throws IOException, JSONException {
         String jsonList = getUrlString(url);
         JSONObject jsonObject = new JSONObject(jsonList);
 
-        return parseLatest(context, jsonObject, category);
+        return parseList(context, jsonObject, category);
     }
 /*
     public List<Essay> fetchFun(Context context, String url) throws IOException, JSONException {
@@ -141,13 +141,13 @@ public class HexoFetchr {
     /**
      * 解析文章列表json
      */
-    private List<Essay> parseLatest(Context context, JSONObject jsonList, String category)
+    private List<Essay> parseList(Context context, JSONObject jsonList, String category)
             throws IOException, JSONException {
 
         List<Essay> essays = EssayLab.get(context).getEssays(category);
         JSONArray topStoriesJsonArray = jsonList.getJSONArray("stories");
 
-        for (int i = 0; i < topStoriesJsonArray.length(); i++) {
+        for (int i = topStoriesJsonArray.length() - 1; i >= 0; i--) {
             JSONObject storyJsonObject = topStoriesJsonArray.getJSONObject(i);
 
             /*数据库中是否"已经存在"该文章*/
@@ -176,7 +176,7 @@ public class HexoFetchr {
                 essay.setImage(image);*/
 
                 EssayLab.get(context).addEssay(essay);
-                Log.i(TAG, "添加了一个Essay，isExist = " + isExist +"title is:" + essay.getTitle());
+                Log.i(TAG, "添加了一个Essay，isExist = " + isExist +"，"+"title is:" + essay.getTitle());
             }
         }
 

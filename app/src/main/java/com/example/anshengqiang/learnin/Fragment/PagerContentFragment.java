@@ -5,13 +5,13 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -43,7 +43,7 @@ public class PagerContentFragment extends Fragment {
     private static final String ZHI_HU_LATEST = "http://news-at.zhihu.com/api/4/news/latest";
     private static final String ZHI_HU_FUN = "http://news-at.zhihu.com/api/3/section/2";
     private static final String ZHI_HU_STORY = "http://news-at.zhihu.com/api/3/section/29";
-    private static final String ZHI_HU_NIGHT = "http://news-at.zhihu.com/api/3/section/1";
+    private static final String ZHI_HU_THINGS = "http://news-at.zhihu.com/api/3/section/35";
 
     private static final String TAG = "PagerContentFragment";
 
@@ -53,7 +53,7 @@ public class PagerContentFragment extends Fragment {
     private RecyclerView.Adapter mAdapter;
     private PosterImageDownloader<EssayListHolder> mPosterImageDownloader;
     private MyDiskLruCache mMyDiskLruCache;
-
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
 
     private void initThread() {
@@ -103,11 +103,6 @@ public class PagerContentFragment extends Fragment {
         mRecyclerView.setAdapter(mAdapter);
     }
 
-    private void updateUI(List<Essay> essays) {
-        mAdapter = new EssayListAdapter(essays);
-        mRecyclerView.setAdapter(mAdapter);
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,7 +122,16 @@ public class PagerContentFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_pager_content, container, false);
 
         mRecyclerView = (RecyclerView) v.findViewById(R.id.tab_content_recycler_view);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 1));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.tab_content_refresh_layout);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateUI();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
 
         updateUI();
 
@@ -140,7 +144,6 @@ public class PagerContentFragment extends Fragment {
         super.onDestroyView();
         mPosterImageDownloader.clearQueue();
     }
-
 
     public class EssayListHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
@@ -216,7 +219,7 @@ public class PagerContentFragment extends Fragment {
         public int getItemCount() {
             if (mEssays != null) {
                 return mEssays.size();
-            }else {
+            } else {
                 return 0;
             }
         }
@@ -232,17 +235,21 @@ public class PagerContentFragment extends Fragment {
             Context context = getActivity().getApplicationContext();
             try {
                 String category = getArguments().getString(ARG_CATEGORY);
-                switch (category){
+                switch (category) {
+                    case "今日":
+                        fetchr.fetchList(context, ZHI_HU_LATEST, "今日");
+                        mItems = fetchr.fetchDetail(context, ZHI_HU, "今日");
+                        break;
                     case "吐槽":
-                        fetchr.fetchLatest(context, ZHI_HU_FUN, "吐槽");
+                        fetchr.fetchList(context, ZHI_HU_FUN, "吐槽");
                         mItems = fetchr.fetchDetail(context, ZHI_HU, "吐槽");
                         break;
-                    case "惊奇":
-                        fetchr.fetchLatest(context, ZHI_HU_NIGHT, "惊奇");
-                        mItems = fetchr.fetchDetail(context, ZHI_HU, "惊奇");
+                    case "小事":
+                        fetchr.fetchList(context, ZHI_HU_THINGS, "小事");
+                        mItems = fetchr.fetchDetail(context, ZHI_HU, "小事");
                         break;
                     case "大误":
-                        fetchr.fetchLatest(context, ZHI_HU_STORY, "大误");
+                        fetchr.fetchList(context, ZHI_HU_STORY, "大误");
                         mItems = fetchr.fetchDetail(context, ZHI_HU, "大误");
                         break;
                     default:
@@ -261,7 +268,8 @@ public class PagerContentFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Essay> essays) {
             mItems = essays;
-            updateUI(mItems);
+            this.cancel(true);
+            //updateUI();
         }
 
     }
@@ -276,7 +284,5 @@ public class PagerContentFragment extends Fragment {
         mPosterImageDownloader.quit();
         Log.i(TAG, "Handler Thread结束运行");
     }
-
-
 
 }

@@ -55,6 +55,7 @@ public class MainFragment extends Fragment {
 
     private void initPager(){
         mTabIndicators = new ArrayList<>();
+        mTabIndicators.add(getResources().getString(R.string.today));
         mTabIndicators.add(getResources().getString(R.string.fun));
         mTabIndicators.add(getResources().getString(R.string.essay));
         mTabIndicators.add(getResources().getString(R.string.story));
@@ -66,6 +67,7 @@ public class MainFragment extends Fragment {
 
         mContentPagerAdapter = new ContentPagerAdapter(getActivity().getSupportFragmentManager());
         mViewPager.setAdapter(mContentPagerAdapter);
+        mViewPager.setOffscreenPageLimit(3);
     }
 
     class ContentPagerAdapter extends FragmentPagerAdapter{

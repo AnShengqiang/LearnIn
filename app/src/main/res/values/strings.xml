@@ -10,6 +10,7 @@
     <string name="hello">你好呀 (^——^)v</string>
 
     <string name="fun">吐槽</string>
-    <string name="essay">惊奇</string>
+    <string name="essay">小事</string>
     <string name="story">大误</string>
+    <string name="today">今日</string>
 </resources>

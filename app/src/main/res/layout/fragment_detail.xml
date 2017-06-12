@@ -48,7 +48,7 @@
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
                     android:maxLines="3"
-                    android:textColor="@color/white"
+                    android:textColor="@color/darkgrey"
                     android:textSize="22sp"
                     tools:text="你好呀"/>
 

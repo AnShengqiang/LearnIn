@@ -4,6 +4,9 @@
     <color name="colorPrimaryDark">#303F9F</color><!--首要颜色暗色-->
     <color name="colorAccent">#FF4081</color><!--色彩强调-->
 
+    <color name="waterblue">#57D2F7</color>
+    <color name="lightpurple">#726DD1</color>
+
     <color name="black">#000000</color><!--黑色 -->
     <color name="white">#FFFFFF</color><!--白色-->
     <color name="snow">#fffafa</color><!--雪白色 -->
