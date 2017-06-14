@@ -9,8 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -20,6 +18,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.aspsine.swipetoloadlayout.OnLoadMoreListener;
+import com.aspsine.swipetoloadlayout.OnRefreshListener;
+import com.aspsine.swipetoloadlayout.SwipeToLoadLayout;
 import com.example.anshengqiang.learnin.Activity.DetailActivity;
 import com.example.anshengqiang.learnin.R;
 import com.example.anshengqiang.learnin.fetchr.HexoFetchr;
@@ -37,24 +38,24 @@ import java.util.List;
  * Created by anshengqiang on 2017/2/27.
  */
 
-public class PagerContentFragment extends Fragment {
+public class PagerContentFragment extends Fragment
+        implements OnRefreshListener, OnLoadMoreListener{
 
+    private static final String TAG = "PagerContentFragment";
     private static final String ARG_CATEGORY = "category";
+
     private static final String ZHI_HU_LATEST = "http://news-at.zhihu.com/api/4/news/latest";
     private static final String ZHI_HU_FUN = "http://news-at.zhihu.com/api/3/section/2";
     private static final String ZHI_HU_STORY = "http://news-at.zhihu.com/api/3/section/29";
     private static final String ZHI_HU_THINGS = "http://news-at.zhihu.com/api/3/section/35";
-
-    private static final String TAG = "PagerContentFragment";
-
     private static final String ZHI_HU = "http://news-at.zhihu.com/api/4/news/";
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private PosterImageDownloader<EssayListHolder> mPosterImageDownloader;
     private MyDiskLruCache mMyDiskLruCache;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
 
+    private SwipeToLoadLayout mSwipeToLoadLayout;
 
     private void initThread() {
 
@@ -96,6 +97,7 @@ public class PagerContentFragment extends Fragment {
      * 获取essays数组，setAdapter()
      */
     private void updateUI() {
+        initThread();
         EssayLab essayLab = EssayLab.get(getActivity());
         List<Essay> essays = essayLab.getEssays(getArguments().getString(ARG_CATEGORY));
 
@@ -121,20 +123,14 @@ public class PagerContentFragment extends Fragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_pager_content, container, false);
 
-        mRecyclerView = (RecyclerView) v.findViewById(R.id.tab_content_recycler_view);
+        mRecyclerView = (RecyclerView) v.findViewById(R.id.swipe_target);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.tab_content_refresh_layout);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                updateUI();
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-        });
+        mSwipeToLoadLayout = (SwipeToLoadLayout)v.findViewById(R.id.swipeToLoadLayout);
+        mSwipeToLoadLayout.setOnRefreshListener(this);
+        mSwipeToLoadLayout.setOnLoadMoreListener(this);
 
-        updateUI();
-
+        autoRefresh();
         return v;
     }
 
@@ -143,6 +139,37 @@ public class PagerContentFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         mPosterImageDownloader.clearQueue();
+    }
+
+    @Override
+    public void onLoadMore() {
+        mSwipeToLoadLayout.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeToLoadLayout.setLoadingMore(false);
+            }
+        }, 2000);
+    }
+
+    @Override
+    public void onRefresh() {
+        updateUI();
+        mSwipeToLoadLayout.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeToLoadLayout.setRefreshing(false);
+            }
+        }, 2000);
+    }
+
+    private void autoRefresh() {
+        updateUI();
+        mSwipeToLoadLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeToLoadLayout.setRefreshing(true);
+            }
+        });
     }
 
     public class EssayListHolder extends RecyclerView.ViewHolder

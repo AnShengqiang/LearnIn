@@ -21,6 +21,7 @@ public class EssayDbSchema {
             public static final String JSONID = "jsonid";
             public static final String CSS = "css";
         }
+
     }
 
 }

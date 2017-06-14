@@ -31,4 +31,6 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:design:25.2.0'
+    //框架：下拉刷新，上拉加载更多
+    compile 'com.github.Aspsine:SwipeToLoadLayout:1.0.4'
 }
