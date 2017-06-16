@@ -42,7 +42,6 @@ public class DetailFragment extends Fragment {
     private Toolbar mToolBar;
     private ImageView mImageView;
     private TextView mTextView;
-    CollapsingToolbarLayout mCollapsingToolbarLayout;
 
 
     public static DetailFragment newInstance(String pageDetail,

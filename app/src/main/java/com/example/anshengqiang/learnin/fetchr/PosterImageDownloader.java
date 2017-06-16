@@ -78,7 +78,7 @@ public class PosterImageDownloader<T> extends HandlerThread {
 
         if (url == null) {
             mRequestMap.remove(target);
-        } else {
+        } else if (mRequestHandler != null){
             mRequestMap.put(target, url);
             mRequestHandler.obtainMessage(MESSAGE_DOWNLOAD, target)
                     .sendToTarget();
@@ -113,7 +113,7 @@ public class PosterImageDownloader<T> extends HandlerThread {
                 bitmap = bitmap1;
                 mMyDiskLruCache.writeImage(url, bitmap1);
             }else {
-                Log.i(TAG, "从缓存取出了一张图片: " + url);
+                //Log.i(TAG, "从缓存取出了一张图片: " + url);
                 Bitmap bitmap1 = mMyDiskLruCache.getCachedBitmap(url);
                 bitmap = bitmap1;
             }

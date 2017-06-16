@@ -23,6 +23,7 @@ import com.aspsine.swipetoloadlayout.OnRefreshListener;
 import com.aspsine.swipetoloadlayout.SwipeToLoadLayout;
 import com.example.anshengqiang.learnin.Activity.DetailActivity;
 import com.example.anshengqiang.learnin.R;
+import com.example.anshengqiang.learnin.Utils.DateNumber;
 import com.example.anshengqiang.learnin.fetchr.HexoFetchr;
 import com.example.anshengqiang.learnin.fetchr.PosterImageDownloader;
 import com.example.anshengqiang.learnin.libcore.MyDiskLruCache;
@@ -32,6 +33,7 @@ import com.example.anshengqiang.learnin.model.EssayLab;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -49,18 +51,27 @@ public class PagerContentFragment extends Fragment
     private static final String ZHI_HU_STORY = "http://news-at.zhihu.com/api/3/section/29";
     private static final String ZHI_HU_THINGS = "http://news-at.zhihu.com/api/3/section/35";
     private static final String ZHI_HU = "http://news-at.zhihu.com/api/4/news/";
+    //后面接8位日期数字
+    private static final String ZHI_HU_NEWS_BEFORE = "http://news-at.zhihu.com/api/4/news/before/";
+
+    private int substract = -1;
+    private DateNumber mDateNumber;
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private EssayListAdapter mAdapter;
     private PosterImageDownloader<EssayListHolder> mPosterImageDownloader;
     private MyDiskLruCache mMyDiskLruCache;
-
     private SwipeToLoadLayout mSwipeToLoadLayout;
 
-    private void initThread() {
+    private String getDateString(int substract){
+        mDateNumber = new DateNumber();
+        return mDateNumber.getDateString(substract);
+    }
+
+    private void initThread(String date) {
 
         /*执行AsyncTask线程*/
-        new FetchItemTask().execute();
+        new FetchItemTask(date).execute();
 
         /*实例化HandlerThread线程*/
         Handler responseHandler = new Handler();
@@ -96,20 +107,25 @@ public class PagerContentFragment extends Fragment
     /**
      * 获取essays数组，setAdapter()
      */
-    private void updateUI() {
-        initThread();
+    private void updateUI(int substractNum) {
+        initThread(getDateString(substractNum));
         EssayLab essayLab = EssayLab.get(getActivity());
         List<Essay> essays = essayLab.getEssays(getArguments().getString(ARG_CATEGORY));
 
-        mAdapter = new EssayListAdapter(essays);
-        mRecyclerView.setAdapter(mAdapter);
+        List<Essay> essayList = new ArrayList<>();
+        for (int i = essays.size() - 1; i >= 0; i--){
+            essayList.add(essays.get(i));
+        }
+        mAdapter.addEssay(essayList);
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EssayLab.get(getActivity()).deleteEssays();
         mMyDiskLruCache = new MyDiskLruCache(getActivity().getApplicationContext());
-        initThread();
+        initThread(getDateString(substract));
     }
 
     @Override
@@ -125,6 +141,9 @@ public class PagerContentFragment extends Fragment
 
         mRecyclerView = (RecyclerView) v.findViewById(R.id.swipe_target);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        mAdapter = new EssayListAdapter();
+        mRecyclerView.setAdapter(mAdapter);
 
         mSwipeToLoadLayout = (SwipeToLoadLayout)v.findViewById(R.id.swipeToLoadLayout);
         mSwipeToLoadLayout.setOnRefreshListener(this);
@@ -147,27 +166,28 @@ public class PagerContentFragment extends Fragment
             @Override
             public void run() {
                 mSwipeToLoadLayout.setLoadingMore(false);
+                updateUI(++substract);
             }
         }, 2000);
     }
 
     @Override
     public void onRefresh() {
-        updateUI();
         mSwipeToLoadLayout.postDelayed(new Runnable() {
             @Override
             public void run() {
                 mSwipeToLoadLayout.setRefreshing(false);
+                updateUI(-1);
             }
         }, 2000);
     }
 
     private void autoRefresh() {
-        updateUI();
         mSwipeToLoadLayout.post(new Runnable() {
             @Override
             public void run() {
                 mSwipeToLoadLayout.setRefreshing(true);
+                updateUI(-1);
             }
         });
     }
@@ -214,12 +234,8 @@ public class PagerContentFragment extends Fragment
 
         private List<Essay> mEssays;
 
-        public EssayListAdapter(List<Essay> essays) {
-            super();
+        private void addEssay(List<Essay> essays) {
             mEssays = essays;
-            if (mEssays == null) {
-                Log.i(TAG, "mEssays is null");
-            }
         }
 
         @Override
@@ -254,7 +270,12 @@ public class PagerContentFragment extends Fragment
 
     public class FetchItemTask extends AsyncTask<Void, Void, List<Essay>> {
         List<Essay> mItems;
+        String dateString;
 
+        public FetchItemTask(String date){
+            super();
+            dateString = date;
+        }
 
         @Override
         protected List<Essay> doInBackground(Void... params) {
@@ -264,7 +285,7 @@ public class PagerContentFragment extends Fragment
                 String category = getArguments().getString(ARG_CATEGORY);
                 switch (category) {
                     case "今日":
-                        fetchr.fetchList(context, ZHI_HU_LATEST, "今日");
+                        fetchr.fetchList(context, ZHI_HU_NEWS_BEFORE + dateString, "今日");
                         mItems = fetchr.fetchDetail(context, ZHI_HU, "今日");
                         break;
                     case "吐槽":
@@ -300,6 +321,11 @@ public class PagerContentFragment extends Fragment
         }
 
     }
+
+    /*@Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+    }*/
 
     @Override
     public void onDestroy() {

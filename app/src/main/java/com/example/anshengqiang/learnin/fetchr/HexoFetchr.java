@@ -94,20 +94,51 @@ public class HexoFetchr {
 
         return parseList(context, jsonObject, category);
     }
-/*
-    public List<Essay> fetchFun(Context context, String url) throws IOException, JSONException {
-        String jsonList = getUrlString(url + "latest");
-        JSONObject jsonObject = new JSONObject(jsonList);
 
-        return parseLatest(context, jsonObject);
+    /**
+     * 解析文章列表json
+     */
+    private List<Essay> parseList(Context context, JSONObject jsonList, String category)
+            throws IOException, JSONException {
+
+        List<Essay> essays = EssayLab.get(context).getEssays(category);
+        JSONArray topStoriesJsonArray = jsonList.getJSONArray("stories");
+
+        for (int i = 0; i < topStoriesJsonArray.length(); i++) {
+            JSONObject storyJsonObject = topStoriesJsonArray.getJSONObject(i);
+
+            /*数据库中是否"已经存在"该文章*/
+            boolean isExist = false;
+            for (int j = 0; j < essays.size(); j++) {
+                /*判断字符串是否相等，a.equals(b)*/
+                if (essays.get(j).getJsonId().equals(storyJsonObject.getString("id"))) {
+                    isExist = true;
+                    //Log.i(TAG, "isExist的值变为" + isExist);
+                    break;
+                }
+            }
+            if (!isExist) {
+                /*新建一个Essay，存入数据*/
+                Essay essay = new Essay();
+
+                essay.setCategory(category);
+                essay.setDate(new Date());                                                          //测试完之后，需要更改
+                essay.setTitle(storyJsonObject.getString("title"));
+                essay.setJsonId(storyJsonObject.getString("id"));
+
+                /*JSONArray imageArray = storyJsonObject.getJSONArray("images");
+                String image = imageArray.toString();
+                image = image.substring(2, 67);
+                Log.i(TAG, "image url is:" + image);
+                essay.setImage(image);*/
+
+                EssayLab.get(context).addEssay(essay);
+                Log.i(TAG, "添加了一个Essay，isExist = " + isExist +"，"+"title is:" + essay.getTitle());
+            }
+        }
+
+        return EssayLab.get(context).getEssays(category);                                           //假如直接使用essays能不能刷新？
     }
-
-    public List<Essay> fetchPsychology(Context context, String url) throws IOException, JSONException {
-        String jsonList = getUrlString(url + "latest");
-        JSONObject jsonObject = new JSONObject(jsonList);
-
-        return parseLatest(context, jsonObject);
-    }*/
 
     /**
      * 连接文章页面
@@ -138,50 +169,7 @@ public class HexoFetchr {
         return essays;
     }
 
-    /**
-     * 解析文章列表json
-     */
-    private List<Essay> parseList(Context context, JSONObject jsonList, String category)
-            throws IOException, JSONException {
 
-        List<Essay> essays = EssayLab.get(context).getEssays(category);
-        JSONArray topStoriesJsonArray = jsonList.getJSONArray("stories");
-
-        for (int i = topStoriesJsonArray.length() - 1; i >= 0; i--) {
-            JSONObject storyJsonObject = topStoriesJsonArray.getJSONObject(i);
-
-            /*数据库中是否"已经存在"该文章*/
-            boolean isExist = false;
-            for (int j = 0; j < essays.size(); j++) {
-                /*判断字符串是否相等，a.equals(b)*/
-                if (essays.get(j).getJsonId().equals(storyJsonObject.getString("id"))) {
-                    isExist = true;
-                    Log.i(TAG, "isExist的值变为" + isExist);
-                    break;
-                }
-            }
-            if (!isExist) {
-                /*新建一个Essay，存入数据*/
-                Essay essay = new Essay();
-
-                essay.setCategory(category);
-                essay.setDate(new Date());                                                          //测试完之后，需要更改
-                essay.setTitle(storyJsonObject.getString("title"));
-                essay.setJsonId(storyJsonObject.getString("id"));
-
-                /*JSONArray imageArray = storyJsonObject.getJSONArray("images");
-                String image = imageArray.toString();
-                image = image.substring(2, 67);
-                Log.i(TAG, "image url is:" + image);
-                essay.setImage(image);*/
-
-                EssayLab.get(context).addEssay(essay);
-                Log.i(TAG, "添加了一个Essay，isExist = " + isExist +"，"+"title is:" + essay.getTitle());
-            }
-        }
-
-        return EssayLab.get(context).getEssays(category);                                                   //假如直接使用essays能不能刷新？
-    }
 
     /**
      * 解析文章json

@@ -38,6 +38,10 @@ public class EssayLab {
         return sEssayLab;
     }
 
+    public void deleteEssays(){
+        mDatabase.delete(EssayTable.NAME, null, null);
+    }
+
     /*向数据库中插入一条essay数据*/
     public void addEssay(Essay essay){
         ContentValues values = getContentValues(essay);

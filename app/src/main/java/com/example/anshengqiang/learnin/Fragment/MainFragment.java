@@ -67,7 +67,7 @@ public class MainFragment extends Fragment {
 
         mContentPagerAdapter = new ContentPagerAdapter(getActivity().getSupportFragmentManager());
         mViewPager.setAdapter(mContentPagerAdapter);
-        mViewPager.setOffscreenPageLimit(3);
+        mViewPager.setOffscreenPageLimit(5);
     }
 
     class ContentPagerAdapter extends FragmentPagerAdapter{
